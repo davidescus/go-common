@@ -1,3 +1,3 @@
-module github.com/davidescus/crypto-history
+module github.com/davidescus/go-common
 
 go 1.25.1
