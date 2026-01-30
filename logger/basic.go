@@ -42,12 +42,24 @@ func (b BasicLogger) Trace(msg string) {
 	}
 	b.logger.Printf("[TRACE] %s %s", b.prefix, msg)
 }
+func (b BasicLogger) Tracef(format string, args ...any) {
+	if LevelTrace < b.level {
+		return
+	}
+	b.output("TRACE", format, args...)
+}
 
 func (b BasicLogger) Debug(msg string) {
 	if LevelDebug < b.level {
 		return
 	}
 	b.logger.Printf("[DEBUG] %s %s", b.prefix, msg)
+}
+func (b BasicLogger) Debugf(format string, args ...any) {
+	if LevelDebug < b.level {
+		return
+	}
+	b.output("DEBUG", format, args...)
 }
 
 func (b BasicLogger) Info(msg string) {
@@ -56,12 +68,24 @@ func (b BasicLogger) Info(msg string) {
 	}
 	b.logger.Printf("[INFO] %s %s", b.prefix, msg)
 }
+func (b BasicLogger) Infof(format string, args ...any) {
+	if LevelInfo < b.level {
+		return
+	}
+	b.output("INFO", format, args...)
+}
 
 func (b BasicLogger) Warn(msg string) {
 	if LevelWarn < b.level {
 		return
 	}
 	b.logger.Printf("[WARN] %s %s", b.prefix, msg)
+}
+func (b BasicLogger) Warnf(format string, args ...any) {
+	if LevelWarn < b.level {
+		return
+	}
+	b.output("WARN", format, args...)
 }
 
 func (b BasicLogger) Error(msg string) {
@@ -70,6 +94,12 @@ func (b BasicLogger) Error(msg string) {
 	}
 	b.logger.Printf("[ERROR] %s %s", b.prefix, msg)
 }
+func (b BasicLogger) Errorf(format string, args ...any) {
+	if LevelError < b.level {
+		return
+	}
+	b.output("ERROR", format, args...)
+}
 
 func (b BasicLogger) Fatal(msg string) {
 	if LevelFatal < b.level {
@@ -77,12 +107,24 @@ func (b BasicLogger) Fatal(msg string) {
 	}
 	b.logger.Fatalf("[FATAL] %s %s", b.prefix, msg)
 }
+func (b BasicLogger) Fatalf(format string, args ...any) {
+	if LevelFatal < b.level {
+		return
+	}
+	b.output("FATAL", format, args...)
+}
 
 func (b BasicLogger) Panic(msg string) {
 	if LevelPanic < b.level {
 		return
 	}
 	b.logger.Panicf("[PANIC] %s %s", b.prefix, msg)
+}
+func (b BasicLogger) Panicf(format string, args ...any) {
+	if LevelPanic < b.level {
+		return
+	}
+	b.output("PANIC", format, args...)
 }
 
 func (b *BasicLogger) SetPrefix(prefix string) CustomLogger {
@@ -138,4 +180,10 @@ func (b BasicLogger) FormatPretty(data interface{}) string {
 
 func (b BasicLogger) Dump(data string) {
 	b.logger.Printf("[DUMP] %s", data)
+}
+
+func (b BasicLogger) output(logType, format string, args ...any) {
+	newFormat := "[" + logType + "] %s " + format
+	newArgs := append([]any{b.prefix}, args...)
+	b.logger.Printf(newFormat, newArgs...)
 }
