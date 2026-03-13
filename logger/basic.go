@@ -22,11 +22,13 @@ const (
 	LevelPanic
 )
 
+type Fields map[string]any
+
 type BasicLogger struct {
 	logger *log.Logger
 	prefix string
 	level  Level
-	fields map[string]any
+	fields Fields
 }
 
 // NewBasicLogger creates a BasicLogger with the provided level.
@@ -129,9 +131,9 @@ func (b BasicLogger) Panicf(format string, args ...any) {
 	b.output("PANIC", format, args...)
 }
 
-func (b *BasicLogger) WithFields(fields map[string]any) CustomLogger {
+func (b *BasicLogger) WithFields(fields Fields) CustomLogger {
 	// Create a new map to hold the combined context
-	newFields := make(map[string]any)
+	newFields := make(Fields)
 
 	// 1. Copy existing fields from the current logger instance
 	for k, v := range b.fields {
@@ -214,17 +216,17 @@ func (b BasicLogger) formatFields() string {
 
 	var parts []string
 	for k, v := range b.fields {
-		// Basic key=value formatting
 		parts = append(parts, fmt.Sprintf("%s=%v", k, v))
 	}
 
-	// Returns: [key1=val1 key2=val2]
+	// Returns: [user_id=123 ip=1.1.1.1]
 	return "[" + strings.Join(parts, " ") + "] "
 }
 
 func (b BasicLogger) output(logType, format string, args ...any) {
-	// Prepend the formatted fields to the log message
 	fieldStr := b.formatFields()
+
+	// The format includes: [LEVEL] Prefix [Fields] Message
 	newFormat := "[" + logType + "] %s %s" + format
 	newArgs := append([]any{b.prefix, fieldStr}, args...)
 
