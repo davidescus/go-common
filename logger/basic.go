@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"reflect"
+	"strings"
 )
 
 // Level controls verbosity. Lower values are more verbose.
@@ -25,6 +26,7 @@ type BasicLogger struct {
 	logger *log.Logger
 	prefix string
 	level  Level
+	fields map[string]any
 }
 
 // NewBasicLogger creates a BasicLogger with the provided level.
@@ -127,6 +129,29 @@ func (b BasicLogger) Panicf(format string, args ...any) {
 	b.output("PANIC", format, args...)
 }
 
+func (b *BasicLogger) WithFields(fields map[string]any) CustomLogger {
+	// Create a new map to hold the combined context
+	newFields := make(map[string]any)
+
+	// 1. Copy existing fields from the current logger instance
+	for k, v := range b.fields {
+		newFields[k] = v
+	}
+
+	// 2. Add the new fields provided in the arguments
+	for k, v := range fields {
+		newFields[k] = v
+	}
+
+	// Return a new logger instance with the merged fields
+	return &BasicLogger{
+		logger: b.logger,
+		prefix: b.prefix,
+		level:  b.level,
+		fields: newFields,
+	}
+}
+
 func (b *BasicLogger) SetPrefix(prefix string) CustomLogger {
 	// return a new BasicLogger that shares the same underlying log.Logger
 	return &BasicLogger{
@@ -182,8 +207,26 @@ func (b BasicLogger) Dump(data string) {
 	b.logger.Printf("[DUMP] %s", data)
 }
 
+func (b BasicLogger) formatFields() string {
+	if len(b.fields) == 0 {
+		return ""
+	}
+
+	var parts []string
+	for k, v := range b.fields {
+		// Basic key=value formatting
+		parts = append(parts, fmt.Sprintf("%s=%v", k, v))
+	}
+
+	// Returns: [key1=val1 key2=val2]
+	return "[" + strings.Join(parts, " ") + "] "
+}
+
 func (b BasicLogger) output(logType, format string, args ...any) {
-	newFormat := "[" + logType + "] %s " + format
-	newArgs := append([]any{b.prefix}, args...)
+	// Prepend the formatted fields to the log message
+	fieldStr := b.formatFields()
+	newFormat := "[" + logType + "] %s %s" + format
+	newArgs := append([]any{b.prefix, fieldStr}, args...)
+
 	b.logger.Printf(newFormat, newArgs...)
 }
