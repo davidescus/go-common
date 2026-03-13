@@ -3,12 +3,21 @@ package logger
 type CustomLogger interface {
 	// levels
 	Trace(msg string)
+	Tracef(format string, args ...any)
 	Debug(msg string)
+	Debugf(format string, args ...any)
 	Info(msg string)
+	Infof(format string, args ...any)
 	Warn(msg string)
+	Warnf(format string, args ...any)
 	Error(msg string)
+	Errorf(format string, args ...any) // <--- Add this
 	Fatal(msg string)
+	Fatalf(format string, args ...any)
 	Panic(msg string)
+	Panicf(format string, args ...any)
+
+	WithFields(fields Fields) CustomLogger
 
 	// SetPrefix returns a new logger instance with the given prefix
 	SetPrefix(prefix string) CustomLogger
